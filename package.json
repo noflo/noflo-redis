@@ -21,7 +21,8 @@
   },
   "noflo": {
     "components": {
-      "Get": "./components/Get.coffee"
+      "Get": "./components/Get.coffee",
+      "Set": "./components/Set.coffee"
     }
   },
   "scripts": {

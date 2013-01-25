@@ -3,7 +3,7 @@ redis = require 'redis'
 url = require 'url'
 
 class RedisComponent extends noflo.AsyncComponent
-  constructor: ->
+  constructor: (@inPortName='key') ->
     @redis = null
 
     if process.env.REDISTOGO_URL
@@ -15,12 +15,12 @@ class RedisComponent extends noflo.AsyncComponent
       @inPorts.url.on 'data', (data) =>
         @createClient data
 
-    @inPorts.in.on 'disconnect', =>
+    @inPorts[@inPortName].on 'disconnect', =>
       setTimeout =>
         @redis.end()
       , 300
 
-    super()
+    super @inPortName
 
   createClient: (redisUrl) ->
     params = url.parse redisUrl

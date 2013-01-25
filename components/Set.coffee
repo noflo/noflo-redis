@@ -1,28 +1,38 @@
 noflo = require 'noflo'
 {RedisComponent} = require '../lib/RedisComponent.coffee'
 
-class Get extends RedisComponent
+class Set extends RedisComponent
   constructor: ->
+    @key = null
+
     @inPorts =
       key: new noflo.Port
+      value: new noflo.Port
     @outPorts =
       out: new noflo.Port
       error: new noflo.Port
 
-    super()
+    @inPorts.key.on 'data', (data) =>
+      @key = data
 
-  doAsync: (key, callback) ->
+    super 'value'
+
+  doAsync: (value, callback) ->
     unless @redis
       callback new Error 'No Redis connection available'
       return
 
-    @redis.get key, (err, reply) =>
+    unless @key
+      callback new Error 'No key defined'
+      return
+
+    @redis.set @key, value, (err, reply) =>
       return callback err if err
       return callback new Error 'No value' if reply is null
-      @outPorts.out.beginGroup key
+      @outPorts.out.beginGroup @key
       @outPorts.out.send reply
       @outPorts.out.endGroup()
       @outPorts.out.disconnect()
       callback()
 
-exports.getComponent = -> new Get
+exports.getComponent = -> new Set

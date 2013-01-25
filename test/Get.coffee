@@ -7,7 +7,7 @@ setupComponent = ->
   ins = socket.createSocket()
   out = socket.createSocket()
   err = socket.createSocket()
-  c.inPorts.in.attach ins
+  c.inPorts.key.attach ins
   c.outPorts.out.attach out
   c.outPorts.error.attach err
   [c, ins, out, err]
@@ -58,3 +58,28 @@ exports['test existing key'] = (test) ->
     created.push 'newkey'
     ins.send 'newkey'
     ins.disconnect()
+
+exports['test multiple existing keys'] = (test) ->
+  [c, ins, out, err] = setupComponent()
+
+  out.once 'data', (data) ->
+    test.ok data
+    test.equals data, 'baz'
+
+  out.once 'disconnect', ->
+    out.once 'data', (data) ->
+      test.ok data
+      test.equals data, 'bar'
+    out.once 'disconnect', ->
+      test.done()
+
+  client.set 'newkey', 'baz', (err, reply) ->
+    return test.done() if err
+    created.push 'newkey'
+    client.set 'secondkey', 'bar', (err, reply) ->
+      return test.done() if err
+      created.push 'secondkey'
+      ins.send 'newkey'
+      ins.disconnect()
+      ins.send 'secondkey'
+      ins.disconnect()
