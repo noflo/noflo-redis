@@ -5,3 +5,5 @@ This module provides components for the [NoFlo](http://noflojs.org/) flow-based 
 
 * Get: get value of a key stored in Redis
 * Set: store a key-value pair to Redis
+* Subscribe: subscribe to a regular or a wildcard (`*`) Redis channel
+* Publish: send a message to a Redis channel
