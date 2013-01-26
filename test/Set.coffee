@@ -80,3 +80,23 @@ exports['test setting multiple keys'] = (test) ->
   key.send 'testsecond'
   val.send 'bar'
   val.disconnect()
+
+exports['test setting a key with object value'] = (test) ->
+  [c, key, val, out, err] = setupComponent()
+  out.once 'data', (data) ->
+    test.equals data, 'OK'
+    created.push 'testset'
+    client.get 'testset', (err, reply) ->
+      return test.done() if err
+      obj = JSON.parse reply
+      test.ok obj.id
+      test.equals obj.id, 'bergie'
+      test.ok obj.displayName
+      test.equals obj.displayName, 'Henri Bergius'
+      test.done()
+
+  key.send 'testset'
+  val.send
+    id: 'bergie'
+    displayName: 'Henri Bergius'
+  val.disconnect()

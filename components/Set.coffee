@@ -26,6 +26,9 @@ class Set extends RedisComponent
       callback new Error 'No key defined'
       return
 
+    if typeof value is 'object'
+      value = JSON.stringify value
+
     @redis.set @key, value, (err, reply) =>
       return callback err if err
       return callback new Error 'No value' if reply is null
