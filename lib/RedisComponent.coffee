@@ -5,26 +5,49 @@ url = require 'url'
 class RedisComponent extends noflo.AsyncComponent
   constructor: (@inPortName='key') ->
     @redis = null
+    @timeOut = null
+
+    @inPorts[@inPortName].on 'connect', =>
+      clearTimeout @timeOut if @timeOut
+      do @connect
+
+    @inPorts[@inPortName].on 'disconnect', =>
+      @timeOut = setTimeout =>
+        do @disconnect
+      , 300
+
+    @inPorts.url = new noflo.Port
+    @inPorts.url.on 'data', (data) =>
+      do @disconnect
+      @redis = @createUrlClient data
+
+    do @connect
+    super @inPortName
+
+  connect: ->
+    return if @redis
 
     if process.env.REDISTOGO_URL
-      @createClient process.env.REDISTOGO_URL
+      @redis = @createUrlClient process.env.REDISTOGO_URL
     else
       @redis = redis.createClient()
 
-      @inPorts.url = new noflo.Port
-      @inPorts.url.on 'data', (data) =>
-        @createClient data
+    @redis.on 'error', (error) =>
+      unless @outPorts.error.isAttached()
+        throw error
+        return
+      @outPorts.error.send error
+      @outPorts.error.disconnect()
 
-    @inPorts[@inPortName].on 'disconnect', =>
-      setTimeout =>
-        @redis.end()
-      , 300
+  disconnect: ->
+    return unless @redis
+    @redis.end()
+    @redis = null
 
-    super @inPortName
-
-  createClient: (redisUrl) ->
+  createUrlClient: (redisUrl) ->
     params = url.parse redisUrl
-    @redis = redis.createClient params.port, params.hostname
-    @redis.auth params.auth.split(':')[1] if params.auth
+    redis = redis.createClient params.port, params.hostname
+    redis.auth params.auth.split(':')[1] if params.auth
+    redis
 
 exports.RedisComponent = RedisComponent

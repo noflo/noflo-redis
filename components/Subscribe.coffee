@@ -16,6 +16,11 @@ class Subscribe extends RedisComponent
       callback new Error 'No Redis connection available'
       return
 
+    unless @redis.connected
+      @redis.once 'connect', =>
+        @doAsync channel, callback
+      return
+
     if channel.indexOf('*') isnt -1
       @doPatternSubscribe channel, callback
       return
@@ -24,6 +29,7 @@ class Subscribe extends RedisComponent
 
   doSubscribe: (channel, callback) ->
     @redis.subscribe channel, (err, reply) =>
+      @emit 'subscribe', channel
       return callback err if err
       callback()
 
@@ -35,6 +41,7 @@ class Subscribe extends RedisComponent
 
   doPatternSubscribe: (pattern, callback) ->
     @redis.psubscribe pattern, (err, reply) =>
+      @emit 'psubscribe', pattern
       return callback err if err
       callback()
 

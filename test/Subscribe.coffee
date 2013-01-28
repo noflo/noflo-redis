@@ -29,10 +29,10 @@ exports['test a regular subscription'] = (test) ->
 
   out.once 'disconnect', ->
     c.redis.unsubscribe()
-    c.redis.end()
+    client.end()
     test.done()
 
-  c.redis.on 'subscribe', ->
+  c.on 'subscribe', ->
     client.publish 'regularchannel', 'Hello, there!'
 
   chan.send 'regularchannel'
@@ -51,10 +51,10 @@ exports['test a wildcard subscription'] = (test) ->
 
   out.once 'disconnect', ->
     c.redis.punsubscribe()
-    c.redis.end()
+    client.end()
     test.done()
 
-  c.redis.on 'psubscribe', ->
+  c.on 'psubscribe', ->
     client.publish 'wildchannel.foo', 'Hello, there!'
 
   chan.send 'wildchannel.*'
