@@ -32,8 +32,8 @@ exports['test a regular channel'] = (test) ->
   client.on 'message', (channel, message) ->
     test.ok message
     test.equals message, 'Hello, there!'
-    test.done()
     client.unsubscribe()
+    test.done()
 
   client.on 'subscribe', ->
     msg.send 'Hello, there!'
@@ -49,8 +49,8 @@ exports['test a wildcard channel'] = (test) ->
     test.ok message
     test.equals channel, 'wildchannel.foo'
     test.equals message, 'Hello, there!'
-    test.done()
     client.punsubscribe()
+    test.done()
 
   client.on 'psubscribe', ->
     msg.send 'Hello, there!'
