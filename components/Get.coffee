@@ -16,13 +16,17 @@ class Get extends RedisComponent
       callback new Error 'No Redis connection available'
       return
 
+    @outPorts.out.connect()
     @redis.get key, (err, reply) =>
-      return callback err if err
-      return callback new Error 'No value' if reply is null
+      if err
+        @outPorts.out.disconnect()
+        return callback err
+      unless reply
+        @outPorts.out.disconnect()
+        return callback new Error 'No value'
       @outPorts.out.beginGroup key
       @outPorts.out.send reply
       @outPorts.out.endGroup()
-      @outPorts.out.disconnect()
       callback()
 
 exports.getComponent = -> new Get
