@@ -16,7 +16,7 @@ class Get extends noflo.AsyncComponent
     super 'key', 'error'
 
   doAsync: (key, callback) ->
-    @outPorts.out.send new Error 'Not yet supported in browser'
+    @outPorts.error.send new Error 'Not yet supported in browser'
     callback()
 
 exports.getComponent = -> new Get

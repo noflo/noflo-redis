@@ -18,7 +18,7 @@ class Set extends noflo.AsyncComponent
     super 'value', 'error'
 
   doAsync: (value, callback) ->
-    @outPorts.out.send new Error 'Not yet supported in browser'
+    @outPorts.error.send new Error 'Not yet supported in browser'
     callback()
 
 exports.getComponent = -> new Set
