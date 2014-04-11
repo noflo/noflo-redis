@@ -1,7 +1,7 @@
 noflo = require 'noflo'
 
 class Get extends noflo.AsyncComponent
-  constructor:
+  constructor: ->
     @inPorts = new noflo.InPorts
       key:
         datatype: 'string'
