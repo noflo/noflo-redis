@@ -13,13 +13,16 @@ class Get extends RedisComponent
 
   doAsync: (key, callback) ->
     unless @redis
-      callback new Error 'No Redis connection available'
+      err = new Error 'No Redis connection available'
+      err.key = key
+      callback err
       return
 
     @outPorts.out.connect()
     @redis.get key, (err, reply) =>
       if err
         @outPorts.out.disconnect()
+        err.key = key
         return callback err
       unless reply
         @outPorts.out.disconnect()
