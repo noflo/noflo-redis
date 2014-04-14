@@ -23,7 +23,9 @@ class Get extends RedisComponent
         return callback err
       unless reply
         @outPorts.out.disconnect()
-        return callback new Error 'No value'
+        err = new Error 'No value'
+        err.key = key
+        return callback err
       @outPorts.out.beginGroup key
       @outPorts.out.send reply
       @outPorts.out.endGroup()

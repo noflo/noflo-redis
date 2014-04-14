@@ -36,6 +36,7 @@ exports['test a missing key'] = (test) ->
     test.ok data
     test.ok data.message
     test.equals data.message, 'No value'
+    test.equals data.key, 'testmissingkey'
 
   err.once 'disconnect', ->
     test.done()
