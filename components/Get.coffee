@@ -1,6 +1,8 @@
 noflo = require 'noflo'
 {RedisComponent} = require '../lib/RedisComponent.coffee'
 
+# @runtime noflo-nodejs
+
 class Get extends RedisComponent
   constructor: ->
     @inPorts =

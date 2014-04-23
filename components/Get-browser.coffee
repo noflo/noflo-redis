@@ -1,5 +1,7 @@
 noflo = require 'noflo'
 
+# @runtime noflo-browser
+
 class Get extends noflo.AsyncComponent
   constructor: ->
     @inPorts = new noflo.InPorts
