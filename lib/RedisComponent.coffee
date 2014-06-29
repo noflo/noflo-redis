@@ -46,8 +46,8 @@ class RedisComponent extends noflo.AsyncComponent
 
   createUrlClient: (redisUrl) ->
     params = url.parse redisUrl
-    redis = redis.createClient params.port, params.hostname
-    redis.auth params.auth.split(':')[1] if params.auth
-    redis
+    r = redis.createClient params.port, params.hostname
+    r.auth params.auth.split(':')[1] if params.auth
+    r
 
 exports.RedisComponent = RedisComponent
