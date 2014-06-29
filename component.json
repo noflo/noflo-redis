@@ -3,7 +3,7 @@
   "description": "Redis components for NoFlo",
   "author": "Henri Bergius <henri.bergius@iki.fi>",
   "repo": "noflo/noflo-redis",
-  "version": "0.1.0",
+  "version": "0.0.9",
   "keywords": [],
   "dependencies": {
     "noflo/noflo": "*"
@@ -17,7 +17,7 @@
     "component.json"
   ],
   "noflo": {
-    "icon": "bitbucket",
+    "icon": "database",
     "components": {
       "Get": "components/Get-browser.coffee",
       "Set": "components/Set-browser.coffee"
