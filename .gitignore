@@ -1,2 +1,4 @@
-node_modules/
+/node_modules/
+/components/*/
+/browser/
 npm-debug.log

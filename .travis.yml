@@ -4,7 +4,7 @@ node_js:
 
 services: redis
 
-script: npm test
+before_script:
+  - npm install -g grunt-cli
 
-notifications:
-  irc: "irc.freenode.org#fbp"
+script: npm test

@@ -1,6 +1,7 @@
 noflo = require 'noflo'
 
 # @runtime noflo-browser
+# @name Set
 
 class Set extends noflo.AsyncComponent
   constructor: ->
