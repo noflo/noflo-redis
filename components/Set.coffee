@@ -1,47 +1,47 @@
 noflo = require 'noflo'
-{RedisComponent} = require '../lib/RedisComponent.coffee'
+RedisPattern = require '../lib/RedisPattern.coffee'
 
 # @runtime noflo-nodejs
+#
+exports.getComponent = ->
+  c = new noflo.Component
+  c.description = 'Set a Redis entry'
+  c.inPorts.add 'key',
+    datatype: 'string'
+  c.inPorts.add 'value',
+    datatype: 'string'
+  c.outPorts.add 'out',
+    datatype: 'string'
+  c.outPorts.add 'error',
+    datatype: 'object'
 
-class Set extends RedisComponent
-  constructor: ->
-    @key = null
-
-    @inPorts =
-      key: new noflo.Port
-      value: new noflo.Port
-    @outPorts =
-      out: new noflo.Port
-      error: new noflo.Port
-
-    @inPorts.key.on 'data', (data) =>
-      @key = data
-
-    super 'value'
-
-  doAsync: (value, callback) ->
-    unless @redis
-      callback new Error 'No Redis connection available'
+  RedisPattern c, 'key'
+  noflo.helpers.WirePattern c,
+    in: ['key', 'value']
+    out: 'out'
+    async: true
+    forwardGroups: true
+  , (data, groups, out, callback) ->
+    unless c.redis
+      err = new Error 'No Redis connection available'
+      err.key = key
+      callback err
       return
 
-    unless @key
-      callback new Error 'No key defined'
-      return
+    if typeof data.value is 'object'
+      data.value = JSON.stringify data.value
 
-    if typeof value is 'object'
-      value = JSON.stringify value
-
-    @outPorts.out.connect()
-    @redis.set @key, value, (err, reply) =>
+    c.redis.set data.key, data.value, (err, reply) ->
       if err
-        @outPorts.out.disconnect()
+        err.key = data.key
         return callback err
       unless reply
-        @outPorts.out.disconnect()
-        return callback new Error 'No value'
-      @outPorts.out.beginGroup @key
-      @outPorts.out.send reply
-      @outPorts.out.endGroup()
-      callback()
+        err = new Error 'No value'
+        err.key = data.key
+        return callback err
+      out.beginGroup data.key
+      out.send reply
+      out.endGroup()
+      do callback
 
-exports.getComponent = -> new Set
+  c

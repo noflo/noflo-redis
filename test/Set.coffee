@@ -32,19 +32,6 @@ exports.tearDown = (done) ->
       todo--
       finished() if todo is 0
 
-exports['test a missing key'] = (test) ->
-  [c, key, val, out, err] = setupComponent()
-  err.once 'data', (data) ->
-    test.ok data
-    test.ok data.message
-    test.equals data.message, 'No key defined'
-
-  err.once 'disconnect', ->
-    test.done()
-
-  val.send 'testmissingkey'
-  val.disconnect()
-
 exports['test setting a key'] = (test) ->
   [c, key, val, out, err] = setupComponent()
   out.once 'data', (data) ->

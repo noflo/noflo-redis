@@ -1,39 +1,44 @@
 noflo = require 'noflo'
-{RedisComponent} = require '../lib/RedisComponent.coffee'
+RedisPattern = require '../lib/RedisPattern.coffee'
 
 # @runtime noflo-nodejs
 
-class Get extends RedisComponent
-  constructor: ->
-    @inPorts =
-      key: new noflo.Port
-    @outPorts =
-      out: new noflo.Port
-      error: new noflo.Port
+exports.getComponent = ->
+  c = new noflo.Component
+  c.description = 'Get a Redis entry by key'
+  c.inPorts.add 'key',
+    datatype: 'string'
+  c.outPorts.add 'out',
+    datatype: 'string'
+  c.outPorts.add 'error',
+    datatype: 'object'
 
-    super()
-
-  doAsync: (key, callback) ->
-    unless @redis
+  RedisPattern c, 'key'
+  noflo.helpers.WirePattern c,
+    in: 'key'
+    out: 'out'
+    async: true
+    forwardGroups: true
+  , (key, groups, out, callback) ->
+    unless c.redis
       err = new Error 'No Redis connection available'
       err.key = key
       callback err
       return
 
-    @outPorts.out.connect()
-    @redis.get key, (err, reply) =>
+    c.redis.get key, (err, reply) ->
       if err
-        @outPorts.out.disconnect()
         err.key = key
         return callback err
       unless reply
-        @outPorts.out.disconnect()
         err = new Error 'No value'
         err.key = key
         return callback err
-      @outPorts.out.beginGroup key
-      @outPorts.out.send reply
-      @outPorts.out.endGroup()
-      callback()
+      out.beginGroup key
+      out.send reply
+      out.endGroup()
+      do callback
 
-exports.getComponent = -> new Get
+  noflo.helpers.MultiError c
+
+  c
