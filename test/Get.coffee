@@ -32,16 +32,27 @@ exports.tearDown = (done) ->
 
 exports['test a missing key'] = (test) ->
   [c, ins, out, err] = setupComponent()
+  groups = []
+  err.on 'begingroup', (data) ->
+    groups.push data
+  err.on 'endgroup', (data) ->
+    groups.pop()
   err.once 'data', (data) ->
     test.ok data
     test.ok data.message
     test.equals data.message, 'No value'
     test.equals data.key, 'testmissingkey'
+    test.equals groups.length, 2
+    test.equals groups[0], 'foo'
 
   err.once 'disconnect', ->
     test.done()
 
+  ins.beginGroup 'foo'
+  ins.beginGroup 'bar'
   ins.send 'testmissingkey'
+  ins.endGroup()
+  ins.endGroup()
   ins.disconnect()
 
 exports['test existing key'] = (test) ->
