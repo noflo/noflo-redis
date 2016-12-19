@@ -21,7 +21,7 @@
     "redis": "^2.6.3"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
+    "grunt": "^1.0.1",
     "grunt-noflo-manifest": "^0.1.12",
     "grunt-noflo-browser": "^0.1.2",
     "grunt-coffeelint": "~0.0.16",
