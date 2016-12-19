@@ -19,9 +19,9 @@ describe 'Set component', ->
   before (done) ->
     @timeout 4000
     loader = new noflo.ComponentLoader baseDir
-    loader.load 'redis/Set', (err, keytance) ->
+    loader.load 'redis/Set', (err, instance) ->
       return done err if err
-      c = keytance
+      c = instance
       key = noflo.internalSocket.createSocket()
       c.inPorts.key.attach key
       val = noflo.internalSocket.createSocket()
