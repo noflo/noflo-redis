@@ -1,10 +1,15 @@
 language: node_js
 node_js:
-  - "4.6"
-
+- '4.6'
 services: redis
-
 before_script:
-  - npm install -g grunt-cli
-
+- npm install -g grunt-cli
 script: npm test
+deploy:
+  provider: npm
+  email: henri.bergius@iki.fi
+  api_key:
+    secure: V9C2eZXVUVohgMbwOa7qVr4XfkRBz0CK3ZVphapfU7a8tEtHeNHznPbTkPWDCAbKmfAQHGIMmh4tZZSw/PPKO0x974an/uMd7gR/0G2qEV4LxlE21pIagPhoMdD0w1+MRalX0UrhilkLxqvqwlwR4QokKpOJo5NyZwZaWdLdcwA=
+  on:
+    tags: true
+    repo: noflo/noflo-redis
