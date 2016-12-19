@@ -72,7 +72,7 @@ describe 'Get component', ->
       ins.disconnect()
 
   describe 'with an existing key', ->
-    it 'should send the value', ->
+    it 'should send the value', (done) ->
       received = false
       out.on 'data', (data) ->
         chai.expect(data).to.equal 'baz'
@@ -88,7 +88,7 @@ describe 'Get component', ->
         ins.disconnect()
 
   describe 'with multiple existing keys', ->
-    it 'should send the values', ->
+    it 'should send the values', (done) ->
       expected = [
         'baz'
         'bar'
@@ -101,11 +101,10 @@ describe 'Get component', ->
         chai.expect(expected.length).to.equal 0
         done()
 
-      client.set ['newkey', 'baz', 'secondkey', 'bar'], (err) ->
+      client.mset ['newkey', 'baz', 'secondkey', 'bar'], (err) ->
         return done err if err
         created.push 'newkey'
         created.push 'secondkey'
         ins.send 'newkey'
         ins.send 'secondkey'
         ins.disconnect()
-
