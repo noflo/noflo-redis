@@ -17,7 +17,7 @@
     "node": ">=0.6.0"
   },
   "dependencies": {
-    "noflo": "^0.5.6",
+    "noflo": "0.x >= 0.5",
     "redis": "^2.6.3"
   },
   "devDependencies": {
