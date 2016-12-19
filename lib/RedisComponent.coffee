@@ -41,7 +41,7 @@ class RedisComponent extends noflo.AsyncComponent
 
   disconnect: ->
     return unless @redis
-    @redis.end()
+    @redis.quit()
     @redis = null
 
   createUrlClient: (redisUrl) ->
