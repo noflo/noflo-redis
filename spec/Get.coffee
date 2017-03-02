@@ -97,8 +97,7 @@ describe 'Get component', ->
       received = false
       out.on 'data', (data) ->
         chai.expect(data).to.equal expected.shift()
-      out.on 'disconnect', ->
-        chai.expect(expected.length).to.equal 0
+        return if expected.length
         done()
 
       client.mset ['newkey', 'baz', 'secondkey', 'bar'], (err) ->
