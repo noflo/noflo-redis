@@ -19,7 +19,7 @@
     "redis": "^2.6.3"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.0.0",
     "coffee-script": "^1.12.2",
     "grunt": "^1.0.1",
     "grunt-coffeelint": "^0.0.16",
