@@ -24,18 +24,10 @@
     "grunt": "^1.0.1",
     "grunt-coffeelint": "^0.0.16",
     "grunt-mocha-test": "^0.13.2",
-    "grunt-noflo-manifest": "^0.1.12",
     "mocha": "^4.0.0"
   },
   "noflo": {
-    "icon": "database",
-    "components": {
-      "Del": "components/Del.coffee",
-      "Get": "components/Get.coffee",
-      "Publish": "components/Publish.coffee",
-      "Set": "components/Set.coffee",
-      "Subscribe": "components/Subscribe.coffee"
-    }
+    "icon": "database"
   },
   "scripts": {
     "test": "grunt test"
