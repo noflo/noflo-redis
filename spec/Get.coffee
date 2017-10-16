@@ -24,6 +24,9 @@ describe 'Get component', ->
       ins = noflo.internalSocket.createSocket()
       c.inPorts.key.attach ins
       client = redis.createClient()
+      clientSocket = noflo.internalSocket.createSocket()
+      c.inPorts.client.attach clientSocket
+      clientSocket.send client
       done()
   after (done) ->
     client.quit()
@@ -58,7 +61,7 @@ describe 'Get component', ->
         chai.expect(data).to.be.an 'error'
         chai.expect(data.message).to.equal 'No value'
         chai.expect(data.key).to.equal 'testmissingkey'
-        chai.expect(groups[0]).to.equal 'foo'
+        chai.expect(groups).to.eql ['foo', 'bar']
         received = true
       err.on 'disconnect', ->
         chai.expect(received).to.equal true

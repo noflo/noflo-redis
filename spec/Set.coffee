@@ -27,6 +27,9 @@ describe 'Set component', ->
       val = noflo.internalSocket.createSocket()
       c.inPorts.value.attach val
       client = redis.createClient()
+      clientSocket = noflo.internalSocket.createSocket()
+      c.inPorts.client.attach clientSocket
+      clientSocket.send client
       done()
   after (done) ->
     client.quit()
@@ -51,6 +54,7 @@ describe 'Set component', ->
 
   describe 'setting a key', ->
     it 'should persist the key', (done) ->
+      err.on 'data', done
       out.on 'data', (data) ->
         chai.expect(data).to.equal 'OK'
         client.get 'testset', (err, reply) ->
@@ -70,6 +74,7 @@ describe 'Set component', ->
       expectedKeys = Object.keys(expected)
       receivedKeys = []
 
+      err.on 'data', done
       out.on 'data', (data) ->
         chai.expect(data).to.equal 'OK'
         expectedKey = expectedKeys.shift()
@@ -88,6 +93,7 @@ describe 'Set component', ->
 
   describe 'setting a key with object value', ->
     it 'should persist the key', (done) ->
+      err.on 'data', done
       out.on 'data', (data) ->
         chai.expect(data).to.equal 'OK'
         client.get 'testset', (err, reply) ->

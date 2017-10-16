@@ -24,6 +24,9 @@ describe 'Del component', ->
       ins = noflo.internalSocket.createSocket()
       c.inPorts.key.attach ins
       client = redis.createClient()
+      clientSocket = noflo.internalSocket.createSocket()
+      c.inPorts.client.attach clientSocket
+      clientSocket.send client
       done()
   after (done) ->
     client.del created, ->
@@ -42,21 +45,22 @@ describe 'Del component', ->
 
   describe 'with a missing key', ->
     it 'should send the key out', (done) ->
-      groups = []
-      received = false
+      expected = [
+        '< foo'
+        '< bar'
+        'testmissingkey'
+        '>'
+        '>'
+      ]
+      received = []
       out.on 'begingroup', (data) ->
-        groups.push data
-      out.on 'endgroup', (data) ->
-        groups.pop()
+        received.push "< #{data}"
       out.on 'data', (data) ->
-        chai.expect(data).to.equal 'testmissingkey'
-        chai.expect(groups).to.eql [
-          'foo'
-          'bar'
-        ]
-        received = true
-      out.on 'disconnect', ->
-        chai.expect(received).to.equal true
+        received.push data
+      out.on 'endgroup', (data) ->
+        received.push '>'
+        return unless received.length is expected.length
+        chai.expect(received).to.eql expected
         done()
 
       ins.beginGroup 'foo'

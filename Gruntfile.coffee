@@ -3,12 +3,6 @@ module.exports = ->
   @initConfig
     pkg: @file.readJSON 'package.json'
 
-    # Updating the package manifest files
-    noflo_manifest:
-      update:
-        files:
-          'package.json': ['graphs/*', 'components/*']
-
     # Browser build of NoFlo
     noflo_browser:
       build:
@@ -35,19 +29,16 @@ module.exports = ->
           grep: process.env.TESTS
 
   # Grunt plugins used for building
-  @loadNpmTasks 'grunt-noflo-manifest'
-
   # Grunt plugins used for testing
   @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-mocha-test'
 
   # Our local tasks
   @registerTask 'build', 'Build NoFlo for the chosen target platform', (target = 'all') =>
-    @task.run 'noflo_manifest'
 
   @registerTask 'test', 'Build NoFlo and run automated tests', (target = 'all') =>
+    @task.run 'build'
     @task.run 'coffeelint'
-    @task.run 'noflo_manifest'
     if target is 'all' or target is 'nodejs'
       @task.run 'mochaTest'
 

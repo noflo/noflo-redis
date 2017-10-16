@@ -26,6 +26,10 @@ describe 'Publish component', ->
       msg = noflo.internalSocket.createSocket()
       c.inPorts.message.attach msg
       client = redis.createClient()
+      client2 = redis.createClient()
+      clientSocket = noflo.internalSocket.createSocket()
+      c.inPorts.client.attach clientSocket
+      clientSocket.send client2
       done()
   after (done) ->
     client.quit()

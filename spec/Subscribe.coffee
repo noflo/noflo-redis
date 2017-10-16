@@ -23,6 +23,10 @@ describe 'Subscribe component', ->
       chan = noflo.internalSocket.createSocket()
       c.inPorts.channel.attach chan
       client = redis.createClient()
+      client2 = redis.createClient()
+      clientSocket = noflo.internalSocket.createSocket()
+      c.inPorts.client.attach clientSocket
+      clientSocket.send client2
       done()
   after (done) ->
     client.quit()
@@ -40,21 +44,21 @@ describe 'Subscribe component', ->
 
   describe 'with a fully-qualified channel name', ->
     it 'should receive the message', (done) ->
-      groups = []
-      received = false
+      expected = [
+        'Hello, there!'
+      ]
+      received = []
       out.on 'begingroup', (group) ->
-        groups.push group
+        received.push "< #{data}"
       out.on 'data', (data) ->
-        chai.expect(data).to.equal 'Hello, there!'
-        chai.expect(groups).to.eql [
-          'regularchannel'
-        ]
-        received = true
+        received.push data
+        return unless received.length is expected.length
+        chai.expect(received).to.eql expected
+        done()
       out.on 'endgroup', ->
-        groups.pop()
-      out.on 'disconnect', ->
-        chai.expect(received).to.equal true
-        c.redis.punsubscribe()
+        received.push '>'
+        return unless received.length is expected.length
+        chai.expect(received).to.eql expected
         done()
       c.on 'subscribe', ->
         client.publish 'regularchannel', 'Hello, there!'
@@ -63,21 +67,21 @@ describe 'Subscribe component', ->
 
   describe 'with a wildcard channel', ->
     it 'should receive the message', (done) ->
-      groups = []
-      received = false
+      expected = [
+        'Hello, there!'
+      ]
+      received = []
       out.on 'begingroup', (group) ->
-        groups.push group
+        received.push "< #{data}"
       out.on 'data', (data) ->
-        chai.expect(data).to.equal 'Hello, there!'
-        chai.expect(groups).to.eql [
-          'wildchannel.foo'
-        ]
-        received = true
+        received.push data
+        return unless received.length is expected.length
+        chai.expect(received).to.eql expected
+        done()
       out.on 'endgroup', ->
-        groups.pop()
-      out.on 'disconnect', ->
-        chai.expect(received).to.equal true
-        c.redis.punsubscribe()
+        received.push '>'
+        return unless received.length is expected.length
+        chai.expect(received).to.eql expected
         done()
       c.on 'psubscribe', ->
         client.publish 'wildchannel.foo', 'Hello, there!'

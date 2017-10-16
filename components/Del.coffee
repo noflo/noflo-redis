@@ -1,5 +1,4 @@
 noflo = require 'noflo'
-RedisPattern = require '../lib/RedisPattern.coffee'
 
 # @runtime noflo-nodejs
 
@@ -8,31 +7,26 @@ exports.getComponent = ->
   c.description = 'Remove a Redis entry by key'
   c.inPorts.add 'key',
     datatype: 'string'
+  c.inPorts.add 'client',
+    datatype: 'object'
+    description: 'Redis client connection'
+    control: true
   c.outPorts.add 'out',
     datatype: 'string'
   c.outPorts.add 'error',
     datatype: 'object'
 
-  RedisPattern c, 'key'
-  noflo.helpers.WirePattern c,
-    in: 'key'
-    out: 'out'
-    async: true
-    forwardGroups: true
-  , (key, groups, out, callback) ->
-    unless c.redis
-      err = new Error 'No Redis connection available'
-      err.key = key
-      callback err
-      return
+  c.forwardBrackets =
+    key: ['out', 'error']
 
-    c.redis.del key, (err, reply) ->
+  c.process (input, output) ->
+    return unless input.hasData 'client', 'key'
+    [client, key] = input.getData 'client', 'key'
+    client.del key, (err, reply) ->
       if err
         err.key = key
-        return callback err
-      out.send key
-      do callback
-
-  noflo.helpers.MultiError c
-
-  c
+        output.done err
+        return
+      output.sendDone
+        out: key
+    return

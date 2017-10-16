@@ -1,56 +1,71 @@
 noflo = require 'noflo'
-{RedisComponent} = require '../lib/RedisComponent.coffee'
 
 # @runtime noflo-nodejs
 
-class Subscribe extends RedisComponent
-  constructor: ->
-    @inPorts =
-      channel: new noflo.Port
-    @outPorts =
-      out: new noflo.Port
-      error: new noflo.Port
+exports.getComponent = ->
+  c = new noflo.Component
+  c.inPorts.add 'channel',
+    datatype: 'string'
+    description: 'Channel to subscribe to'
+  c.inPorts.add 'client',
+    datatype: 'object'
+    description: 'Redis client connection'
+    control: true
+  c.outPorts.add 'out',
+    datatype: 'string'
+  c.outPorts.add 'error',
+    datatype: 'object'
+  c.subscription = null
+  unsubscribe = ->
+    return unless c.subscription
+    if c.subscription.channel and c.subscription.client
+      if c.subscription.listener
+        c.subscription.client.removeListener 'message', c.subscription.listener
+      c.subscription.client.unsubscribe c.subscription.channel
+    if c.subscription.pchannel and c.subscription.client
+      if c.subscription.listener
+        c.subscription.client.removeListener 'pmessage', c.subscription.listener
+      c.subscription.client.punsubscribe c.subscription.pchannel
+    if c.subscription.ctx
+      c.subscription.ctx.deactivate()
+    c.subscription = null
+  c.tearDown = (callback) ->
+    do unsubscribe
+    do callback
+  c.process (input, output, context) ->
+    return unless input.hasData 'client', 'channel'
+    [client, channel] = input.getData 'client', 'channel'
 
-    super 'channel'
+    # Remove previous subscription, if any
+    do unsubscribe
 
-  doAsync: (channel, callback) ->
-    unless @redis
-      callback new Error 'No Redis connection available'
-      return
-
-    unless @redis.connected
-      @redis.once 'connect', =>
-        @doAsync channel, callback
-      return
+    c.subscription =
+      ctx: context
+      client: client
 
     if channel.indexOf('*') isnt -1
-      @doPatternSubscribe channel, callback
+      # Pattern subscription
+      c.subscription.pchannel = channel
+      client.psubscribe channel, (err) ->
+        if err
+          err.channel = channel
+          output.done err
+          return
+        c.subscription.listener = (patt, chan, msg) ->
+          output.send
+            out: msg
+        client.on 'pmessage', c.subscription.listener
+        c.emit 'psubscribe', channel
       return
-
-    @doSubscribe channel, callback
-
-  doSubscribe: (channel, callback) ->
-    @redis.subscribe channel, (err, reply) =>
-      @emit 'subscribe', channel
-      return callback err if err
-      callback()
-
-    @redis.on 'message', (chan, msg) =>
-      @outPorts.out.beginGroup chan
-      @outPorts.out.send msg
-      @outPorts.out.endGroup()
-      @outPorts.out.disconnect()
-
-  doPatternSubscribe: (pattern, callback) ->
-    @redis.psubscribe pattern, (err, reply) =>
-      @emit 'psubscribe', pattern
-      return callback err if err
-      callback()
-
-    @redis.on 'pmessage', (patt, chan, msg) =>
-      @outPorts.out.beginGroup chan
-      @outPorts.out.send msg
-      @outPorts.out.endGroup()
-      @outPorts.out.disconnect()
-
-exports.getComponent = -> new Subscribe
+    # Exact channel subscription
+    c.subscription.channel = channel
+    client.subscribe channel, (err) ->
+      if err
+        err.channel = channel
+        output.done err
+        return
+      c.subscription.listener = (chan, msg) ->
+        output.send
+          out: msg
+      client.on 'message', c.subscription.listener
+      c.emit 'subscribe', channel
