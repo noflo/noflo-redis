@@ -8,37 +8,30 @@ exports.getComponent = ->
   c.description = 'Get a Redis entry by key'
   c.inPorts.add 'key',
     datatype: 'string'
+  c.inPorts.add 'client',
+    datatype: 'object'
+    description: 'Redis client connection'
+    control: true
   c.outPorts.add 'out',
     datatype: 'string'
   c.outPorts.add 'error',
     datatype: 'object'
 
-  RedisPattern c, 'key'
-  noflo.helpers.WirePattern c,
-    in: 'key'
-    out: 'out'
-    async: true
-    forwardGroups: true
-  , (key, groups, out, callback) ->
-    unless c.redis
-      err = new Error 'No Redis connection available'
-      err.key = key
-      callback err
-      return
+  c.forwardBrackets =
+    key: ['out', 'error']
 
-    c.redis.get key, (err, reply) ->
+  c.process (input, output) ->
+    return unless input.hasData 'client', 'key'
+    [client, key] = input.getData 'client', 'key'
+    client.get key, (err, reply) ->
       if err
         err.key = key
-        return callback err
+        output.done err
+        return
       unless reply
         err = new Error 'No value'
         err.key = key
-        return callback err
-      out.beginGroup key
-      out.send reply
-      out.endGroup()
-      do callback
-
-  noflo.helpers.MultiError c
-
-  c
+        output.done err
+        return
+      output.sendDone
+        out: reply
