@@ -1,5 +1,4 @@
 noflo = require 'noflo'
-RedisPattern = require '../lib/RedisPattern.coffee'
 
 # @runtime noflo-nodejs
 
