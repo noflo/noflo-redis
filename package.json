@@ -12,7 +12,7 @@
     "noflo"
   ],
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=4.6"
   },
   "dependencies": {
     "noflo": "0.x >= 0.8",
