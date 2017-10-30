@@ -28,7 +28,7 @@ exports.getComponent = ->
     datatype: 'object'
 
   c.forwardBrackets =
-    value: ['out', 'error']
+    key: ['out', 'error']
 
   c.process (input, output) ->
     return unless input.hasData 'client', 'key'
