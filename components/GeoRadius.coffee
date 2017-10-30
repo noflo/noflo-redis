@@ -4,7 +4,8 @@ noflo = require 'noflo'
 
 exports.getComponent = ->
   c = new noflo.Component
-  c.description = 'Set a Redis entry'
+  c.description = 'Get a list of members inside a radius'
+  c.icon = 'map-o'
   c.inPorts.add 'key',
     datatype: 'string'
   c.inPorts.add 'latitude',
