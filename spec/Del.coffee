@@ -30,8 +30,7 @@ describe 'Del component', ->
       done()
   after (done) ->
     client.del created, ->
-      client.quit()
-      done()
+      client.quit done
   beforeEach ->
     out = noflo.internalSocket.createSocket()
     c.outPorts.out.attach out

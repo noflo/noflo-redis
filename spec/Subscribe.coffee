@@ -14,6 +14,7 @@ describe 'Subscribe component', ->
   out = null
   err = null
   client = null
+  client2 = null
   before (done) ->
     @timeout 4000
     loader = new noflo.ComponentLoader baseDir
@@ -27,10 +28,13 @@ describe 'Subscribe component', ->
       clientSocket = noflo.internalSocket.createSocket()
       c.inPorts.client.attach clientSocket
       clientSocket.send client2
-      done()
+      c.start done
   after (done) ->
-    client.quit()
-    done()
+    c.shutdown (err) ->
+      return done err if err
+      client.quit (err) ->
+        return done err if err
+        client2.quit done
   beforeEach ->
     out = noflo.internalSocket.createSocket()
     c.outPorts.out.attach out

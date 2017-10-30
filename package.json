@@ -20,16 +20,15 @@
   },
   "devDependencies": {
     "chai": "^4.0.0",
-    "coffee-script": "^1.12.2",
-    "grunt": "^1.0.1",
-    "grunt-coffeelint": "^0.0.16",
-    "grunt-mocha-test": "^0.13.2",
+    "coffeelint": "^2.0.7",
+    "coffeescript": "^2.0.2",
     "mocha": "^4.0.0"
   },
   "noflo": {
     "icon": "database"
   },
   "scripts": {
-    "test": "grunt test"
+    "pretest": "coffeelint -r components spec",
+    "test": "mocha --require coffeescript/register spec/*.coffee"
   }
 }

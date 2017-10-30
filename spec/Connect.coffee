@@ -23,7 +23,7 @@ describe 'Connect component', ->
       c.inPorts.url.attach ins
       done()
   after (done) ->
-    done()
+    c.shutdown done
   beforeEach ->
     out = noflo.internalSocket.createSocket()
     c.outPorts.client.attach out

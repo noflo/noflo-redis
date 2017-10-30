@@ -29,8 +29,7 @@ describe 'Get component', ->
       clientSocket.send client
       done()
   after (done) ->
-    client.quit()
-    done()
+    client.quit done
   beforeEach ->
     out = noflo.internalSocket.createSocket()
     c.outPorts.out.attach out
