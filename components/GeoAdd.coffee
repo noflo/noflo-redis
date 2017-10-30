@@ -31,9 +31,6 @@ exports.getComponent = ->
     [client, key] = input.getData 'client', 'key'
     [member, lat, lon] = input.getData 'member', 'latitude', 'longitude'
 
-    if typeof value is 'object'
-      value = JSON.stringify value
-
     client.geoadd key, lat, lon, member, (err, reply) ->
       if err
         console.log err
