@@ -32,7 +32,7 @@
   },
   "scripts": {
     "pretest": "coffeelint -r components spec",
-    "test": "nyc mocha --require coffee-script/register --require coffee-coverage/register-istanbul --recursive spec/*.coffee"
+    "test": "nyc mocha --require coffee-script/register --require coffee-coverage/register-istanbul spec/*.coffee"
   },
   "nyc": {
     "include": [
