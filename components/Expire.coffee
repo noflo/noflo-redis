@@ -15,6 +15,7 @@ exports.getComponent = ->
     datatype: 'object'
     description: 'Redis client connection'
     control: true
+    scoped: false
   c.outPorts.add 'out',
     datatype: 'string'
   c.outPorts.add 'error',

@@ -4,6 +4,8 @@ noflo = require 'noflo'
 
 exports.getComponent = ->
   c = new noflo.Component
+  c.icon = 'stack-overflow'
+  c.description = 'Receive messages from a specified channel'
   c.inPorts.add 'channel',
     datatype: 'string'
     description: 'Channel to subscribe to'
@@ -11,6 +13,7 @@ exports.getComponent = ->
     datatype: 'object'
     description: 'Redis client connection'
     control: true
+    scoped: false
   c.outPorts.add 'out',
     datatype: 'string'
   c.outPorts.add 'error',

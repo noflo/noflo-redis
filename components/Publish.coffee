@@ -4,6 +4,8 @@ noflo = require 'noflo'
 
 exports.getComponent = ->
   c = new noflo.Component
+  c.icon = 'paper-plane'
+  c.description = 'Publish a message into a specified channel'
   c.inPorts.add 'channel',
     datatype: 'string'
     description: 'Channel to publish to'
@@ -14,6 +16,7 @@ exports.getComponent = ->
     datatype: 'object'
     description: 'Redis client connection'
     control: true
+    scoped: false
   c.outPorts.add 'out',
     datatype: 'string'
   c.outPorts.add 'error',

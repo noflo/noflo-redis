@@ -5,6 +5,7 @@ redis = require 'redis'
 
 exports.getComponent = ->
   c = new noflo.Component
+  c.description = 'Connect to a Redis database identified by a URL'
   c.inPorts.add 'url',
     datatype: 'string'
     description: 'Redis database URL to connect to'
