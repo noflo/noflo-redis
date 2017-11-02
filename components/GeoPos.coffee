@@ -34,7 +34,7 @@ exports.getComponent = ->
         err.member = member
         output.done err
         return
-      unless reply?.length
+      unless reply?[0]?.length
         err = new Error 'No value'
         err.key = key
         err.member = member
