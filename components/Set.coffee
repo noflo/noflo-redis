@@ -34,10 +34,5 @@ exports.getComponent = ->
         err.key = key
         output.done err
         return
-      unless reply
-        err = new Error 'No value'
-        err.key = key
-        output.done err
-        return
       output.sendDone
         out: reply
