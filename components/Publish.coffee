@@ -33,4 +33,4 @@ exports.getComponent = ->
         output.done err
         return
       output.sendDone
-        out: value
+        out: reply
