@@ -37,7 +37,7 @@ exports.getComponent = () => {
         });
         return;
       }
-      if (!reply || !reply.length) {
+      if (!reply || !reply[0] || !reply[0].length) {
         const error = new Error('No value');
         error.key = key;
         error.member = member;
