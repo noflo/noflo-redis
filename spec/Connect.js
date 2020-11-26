@@ -3,8 +3,8 @@ const Wrapper = require('noflo-wrapper');
 
 describe('Connect component', () => {
   let client = null;
-  let c = Wrapper('redis/connect');
-  before(t.start);
+  const c = new Wrapper('redis/connect');
+  before(c.start);
   afterEach((done) => {
     if (!client) {
       done();
