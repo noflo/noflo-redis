@@ -1,51 +1,45 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const noflo = require('noflo');
 
 // @runtime noflo-nodejs
 
-exports.getComponent = function() {
-  const c = new noflo.Component;
+exports.getComponent = () => {
+  const c = new noflo.Component();
   c.description = 'Set a Redis entry';
   c.inPorts.add('key',
-    {datatype: 'string'});
+    { datatype: 'string' });
   c.inPorts.add('value',
-    {datatype: 'string'});
+    { datatype: 'string' });
   c.inPorts.add('client', {
     datatype: 'object',
     description: 'Redis client connection',
     control: true,
-    scoped: false
-  }
-  );
+    scoped: false,
+  });
   c.outPorts.add('out',
-    {datatype: 'string'});
+    { datatype: 'string' });
   c.outPorts.add('error',
-    {datatype: 'object'});
+    { datatype: 'object' });
 
-  c.forwardBrackets =
-    {value: ['out', 'error']};
+  c.forwardBrackets = { value: ['out', 'error'] };
 
-  return c.process(function(input, output) {
+  return c.process((input, output) => {
     if (!input.hasData('client', 'key', 'value')) { return; }
-    let [client, key, value] = Array.from(input.getData('client', 'key', 'value'));
+    const [client, key, value] = input.getData('client', 'key', 'value');
 
+    let stringValue = value;
     if (typeof value === 'object') {
-      value = JSON.stringify(value);
+      stringValue = JSON.stringify(value);
     }
 
-    return client.set(key, value, function(err, reply) {
+    client.set(key, stringValue, (err, reply) => {
       if (err) {
-        err.key = key;
-        output.done(err);
+        output.done({
+          ...err,
+          key,
+        });
         return;
       }
-      return output.sendDone({
-        out: reply});
+      output.sendDone({ out: reply });
     });
   });
 };

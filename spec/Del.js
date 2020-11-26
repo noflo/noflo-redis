@@ -3,7 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let baseDir, chai;
+let baseDir; let
+  chai;
 const noflo = require('noflo');
 const redis = require('redis');
 
@@ -15,17 +16,17 @@ if (!noflo.isBrowser()) {
   baseDir = 'noflo-redis';
 }
 
-describe('Del component', function() {
+describe('Del component', () => {
   let c = null;
   let ins = null;
   let out = null;
   let err = null;
   const created = [];
   let client = null;
-  before(function(done) {
+  before(function (done) {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Del', function(err, instance) {
+    return loader.load('redis/Del', (err, instance) => {
       if (err) { return done(err); }
       c = instance;
       ins = noflo.internalSocket.createSocket();
@@ -37,32 +38,32 @@ describe('Del component', function() {
       return done();
     });
   });
-  after(done => client.del(created, () => client.quit(done)));
-  beforeEach(function() {
+  after((done) => client.del(created, () => client.quit(done)));
+  beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
     return c.outPorts.error.attach(err);
   });
-  afterEach(function() {
+  afterEach(() => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     return err = null;
   });
 
-  describe('with a missing key', () => it('should send the key out', function(done) {
+  describe('with a missing key', () => it('should send the key out', (done) => {
     const expected = [
       '< foo',
       '< bar',
       'testmissingkey',
       '>',
-      '>'
+      '>',
     ];
     const received = [];
-    out.on('begingroup', data => received.push(`< ${data}`));
-    out.on('data', data => received.push(data));
-    out.on('endgroup', function(data) {
+    out.on('begingroup', (data) => received.push(`< ${data}`));
+    out.on('data', (data) => received.push(data));
+    out.on('endgroup', (data) => {
       received.push('>');
       if (received.length !== expected.length) { return; }
       chai.expect(received).to.eql(expected);
@@ -77,23 +78,23 @@ describe('Del component', function() {
     return ins.disconnect();
   }));
 
-  return describe('with an existing key', () => it('should send the key out', function(done) {
+  return describe('with an existing key', () => it('should send the key out', (done) => {
     const groups = [];
     let received = false;
-    out.on('data', function(data) {
+    out.on('data', (data) => {
       chai.expect(data).to.equal('newkey');
       return received = true;
     });
-    out.on('disconnect', function() {
+    out.on('disconnect', () => {
       chai.expect(received).to.equal(true);
       // Check that key was actually removed
-      return client.get('newkey', function(err, val) {
+      return client.get('newkey', (err, val) => {
         chai.expect(val).to.be.a('null');
         return done();
       });
     });
 
-    return client.set('newkey', 'baz', function(err, reply) {
+    return client.set('newkey', 'baz', (err, reply) => {
       if (err) { return done(err); }
       ins.send('newkey');
       return ins.disconnect();

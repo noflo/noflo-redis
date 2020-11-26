@@ -1,35 +1,27 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const noflo = require('noflo');
 
 // @runtime noflo-nodejs
 
-exports.getComponent = function() {
-  const c = new noflo.Component;
+exports.getComponent = () => {
+  const c = new noflo.Component();
   c.icon = 'stack-overflow';
   c.description = 'Receive messages from a specified channel';
   c.inPorts.add('channel', {
     datatype: 'string',
-    description: 'Channel to subscribe to'
-  }
-  );
+    description: 'Channel to subscribe to',
+  });
   c.inPorts.add('client', {
     datatype: 'object',
     description: 'Redis client connection',
     control: true,
-    scoped: false
-  }
-  );
+    scoped: false,
+  });
   c.outPorts.add('out',
-    {datatype: 'string'});
+    { datatype: 'string' });
   c.outPorts.add('error',
-    {datatype: 'object'});
+    { datatype: 'object' });
   c.subscription = null;
-  const unsubscribe = function() {
+  function unsubscribe() {
     if (!c.subscription) { return; }
     if (c.subscription.channel && c.subscription.client) {
       if (c.subscription.listener) {
@@ -46,52 +38,54 @@ exports.getComponent = function() {
     if (c.subscription.ctx) {
       c.subscription.ctx.deactivate();
     }
-    return c.subscription = null;
-  };
-  c.tearDown = function(callback) {
+    c.subscription = null;
+  }
+  c.tearDown = (callback) => {
     unsubscribe();
-    return callback();
+    callback();
   };
-  return c.process(function(input, output, context) {
+  return c.process((input, output, context) => {
     if (!input.hasData('client', 'channel')) { return; }
-    const [client, channel] = Array.from(input.getData('client', 'channel'));
+    const [client, channel] = input.getData('client', 'channel');
 
     // Remove previous subscription, if any
     unsubscribe();
 
     c.subscription = {
       ctx: context,
-      client
+      client,
     };
 
     if (channel.indexOf('*') !== -1) {
       // Pattern subscription
       c.subscription.pchannel = channel;
-      client.psubscribe(channel, function(err) {
+      client.psubscribe(channel, (err) => {
         if (err) {
-          err.channel = channel;
-          output.done(err);
+          output.done({
+            ...err,
+            channel,
+          });
           return;
         }
-        c.subscription.listener = (patt, chan, msg) => output.send({
-          out: msg});
+        c.subscription.listener = (patt, chan, msg) => output.send({ out: msg });
         client.on('pmessage', c.subscription.listener);
-        return c.emit('psubscribe', channel);
+        c.emit('psubscribe', channel);
       });
       return;
     }
     // Exact channel subscription
     c.subscription.channel = channel;
-    return client.subscribe(channel, function(err) {
+    client.subscribe(channel, (err) => {
       if (err) {
-        err.channel = channel;
-        output.done(err);
+        output.done({
+          ...err,
+          channel,
+        });
         return;
       }
-      c.subscription.listener = (chan, msg) => output.send({
-        out: msg});
+      c.subscription.listener = (chan, msg) => output.send({ out: msg });
       client.on('message', c.subscription.listener);
-      return c.emit('subscribe', channel);
+      c.emit('subscribe', channel);
     });
   });
 };

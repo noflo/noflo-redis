@@ -3,7 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let baseDir, chai;
+let baseDir; let
+  chai;
 const noflo = require('noflo');
 const redis = require('redis');
 
@@ -15,17 +16,17 @@ if (!noflo.isBrowser()) {
   baseDir = 'noflo-redis';
 }
 
-describe('Zrem component', function() {
+describe('Zrem component', () => {
   let c = null;
   let key = null;
   let member = null;
   let out = null;
   let err = null;
   let client = null;
-  before(function(done) {
+  before(function (done) {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Zrem', function(err, keytance) {
+    return loader.load('redis/Zrem', (err, keytance) => {
       if (err) { return done(err); }
       c = keytance;
       key = noflo.internalSocket.createSocket();
@@ -39,25 +40,25 @@ describe('Zrem component', function() {
       return done();
     });
   });
-  after(done => client.quit(done));
-  beforeEach(function() {
+  after((done) => client.quit(done));
+  beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
     return c.outPorts.error.attach(err);
   });
-  afterEach(function() {
+  afterEach(() => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     return err = null;
   });
 
-  describe('with a missing key', () => it('should send the key out', function(done) {
-    out.on('data', function(data) {
+  describe('with a missing key', () => it('should send the key out', (done) => {
+    out.on('data', (data) => {
       chai.expect(data).to.eql({
         key: 'testmissingkey',
-        member: 'foo'
+        member: 'foo',
       });
       return done();
     });
@@ -67,20 +68,20 @@ describe('Zrem component', function() {
     return key.disconnect();
   }));
 
-  return describe('with an existing key', () => it('should send the key out', function(done) {
-    out.on('data', function(data) {
+  return describe('with an existing key', () => it('should send the key out', (done) => {
+    out.on('data', (data) => {
       chai.expect(data).to.eql({
         key: 'newkey',
-        member: 'baz'
+        member: 'baz',
       });
       // Check that member was actually removed
-      return client.zrange('newkey', 0, 1, function(err, val) {
+      return client.zrange('newkey', 0, 1, (err, val) => {
         chai.expect(val).to.be.eql([]);
         return done();
       });
     });
 
-    return client.zadd('newkey', 1, 'baz', function(err, reply) {
+    return client.zadd('newkey', 1, 'baz', (err, reply) => {
       if (err) { return done(err); }
       key.send('newkey');
       return member.send('baz');

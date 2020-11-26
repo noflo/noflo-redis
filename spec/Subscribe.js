@@ -3,7 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let baseDir, chai;
+let baseDir; let
+  chai;
 const noflo = require('noflo');
 const redis = require('redis');
 
@@ -15,17 +16,17 @@ if (!noflo.isBrowser()) {
   baseDir = 'noflo-redis';
 }
 
-describe('Subscribe component', function() {
+describe('Subscribe component', () => {
   let c = null;
   let chan = null;
   let out = null;
   let err = null;
   let client = null;
   let client2 = null;
-  before(function(done) {
+  before(function (done) {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Subscribe', function(err, instance) {
+    return loader.load('redis/Subscribe', (err, instance) => {
       if (err) { return done(err); }
       c = instance;
       chan = noflo.internalSocket.createSocket();
@@ -38,39 +39,39 @@ describe('Subscribe component', function() {
       return c.start(done);
     });
   });
-  after(done => c.shutdown(function(err) {
+  after((done) => c.shutdown((err) => {
     if (err) { return done(err); }
-    return client.quit(function(err) {
+    return client.quit((err) => {
       if (err) { return done(err); }
       return client2.quit(done);
     });
   }));
-  beforeEach(function() {
+  beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
     return c.outPorts.error.attach(err);
   });
-  afterEach(function() {
+  afterEach(() => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     return err = null;
   });
 
-  describe('with a fully-qualified channel name', () => it('should receive the message', function(done) {
+  describe('with a fully-qualified channel name', () => it('should receive the message', (done) => {
     const expected = [
-      'Hello, there!'
+      'Hello, there!',
     ];
     const received = [];
-    out.on('begingroup', group => received.push(`< ${data}`));
-    out.on('data', function(data) {
+    out.on('begingroup', (group) => received.push(`< ${data}`));
+    out.on('data', (data) => {
       received.push(data);
       if (received.length !== expected.length) { return; }
       chai.expect(received).to.eql(expected);
       return done();
     });
-    out.on('endgroup', function() {
+    out.on('endgroup', () => {
       received.push('>');
       if (received.length !== expected.length) { return; }
       chai.expect(received).to.eql(expected);
@@ -81,19 +82,19 @@ describe('Subscribe component', function() {
     return chan.disconnect();
   }));
 
-  return describe('with a wildcard channel', () => it('should receive the message', function(done) {
+  return describe('with a wildcard channel', () => it('should receive the message', (done) => {
     const expected = [
-      'Hello, there!'
+      'Hello, there!',
     ];
     const received = [];
-    out.on('begingroup', group => received.push(`< ${data}`));
-    out.on('data', function(data) {
+    out.on('begingroup', (group) => received.push(`< ${data}`));
+    out.on('data', (data) => {
       received.push(data);
       if (received.length !== expected.length) { return; }
       chai.expect(received).to.eql(expected);
       return done();
     });
-    out.on('endgroup', function() {
+    out.on('endgroup', () => {
       received.push('>');
       if (received.length !== expected.length) { return; }
       chai.expect(received).to.eql(expected);

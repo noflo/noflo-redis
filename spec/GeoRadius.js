@@ -3,7 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let baseDir, chai;
+let baseDir; let
+  chai;
 const noflo = require('noflo');
 const redis = require('redis');
 
@@ -15,7 +16,7 @@ if (!noflo.isBrowser()) {
   baseDir = 'noflo-redis';
 }
 
-describe('GeoRadius component', function() {
+describe('GeoRadius component', () => {
   let c = null;
   let key = null;
   let radius = null;
@@ -25,10 +26,10 @@ describe('GeoRadius component', function() {
   let out = null;
   let err = null;
   let client = null;
-  before(function(done) {
+  before(function (done) {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/GeoRadius', function(err, instance) {
+    return loader.load('redis/GeoRadius', (err, instance) => {
       if (err) { return done(err); }
       c = instance;
       key = noflo.internalSocket.createSocket();
@@ -48,34 +49,34 @@ describe('GeoRadius component', function() {
       return done();
     });
   });
-  after(done => client.quit(done));
-  beforeEach(function() {
+  after((done) => client.quit(done));
+  beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
     return c.outPorts.error.attach(err);
   });
-  afterEach(function() {
+  afterEach(() => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     return err = null;
   });
 
-  return describe('getting members inside a radius', function() {
-    before(done => client.geoadd('testset', 60.254558, 25.042828, 'EFHF', function(err) {
+  return describe('getting members inside a radius', () => {
+    before((done) => client.geoadd('testset', 60.254558, 25.042828, 'EFHF', (err) => {
       if (err) { return done(err); }
       return client.geoadd('testset', 60.317222, 24.963333, 'EFHK', done);
     }));
-    after(done => client.zrem('testset', 'EFHF', function(err) {
+    after((done) => client.zrem('testset', 'EFHF', (err) => {
       if (err) { return done(err); }
       return client.zrem('testset', 'EFHK', done);
     }));
-    it('should return one member inside small radius', function(done) {
+    it('should return one member inside small radius', (done) => {
       err.on('data', done);
-      out.on('data', function(data) {
+      out.on('data', (data) => {
         chai.expect(data).to.eql([
-          'EFHF'
+          'EFHF',
         ]);
         return done();
       });
@@ -85,12 +86,12 @@ describe('GeoRadius component', function() {
       unit.send('km');
       return radius.send(6);
     });
-    return it('should return two members inside larger radius', function(done) {
+    return it('should return two members inside larger radius', (done) => {
       err.on('data', done);
-      out.on('data', function(data) {
+      out.on('data', (data) => {
         chai.expect(data).to.eql([
           'EFHF',
-          'EFHK'
+          'EFHK',
         ]);
         return done();
       });

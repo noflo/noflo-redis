@@ -3,7 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let baseDir, chai;
+let baseDir; let
+  chai;
 const noflo = require('noflo');
 const redis = require('redis');
 
@@ -15,7 +16,7 @@ if (!noflo.isBrowser()) {
   baseDir = 'noflo-redis';
 }
 
-describe('Set component', function() {
+describe('Set component', () => {
   let c = null;
   let key = null;
   let val = null;
@@ -23,10 +24,10 @@ describe('Set component', function() {
   let err = null;
   const created = [];
   let client = null;
-  before(function(done) {
+  before(function (done) {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Set', function(err, instance) {
+    return loader.load('redis/Set', (err, instance) => {
       if (err) { return done(err); }
       c = instance;
       key = noflo.internalSocket.createSocket();
@@ -40,22 +41,22 @@ describe('Set component', function() {
       return done();
     });
   });
-  after(done => client.quit(done));
-  beforeEach(function() {
+  after((done) => client.quit(done));
+  beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
     return c.outPorts.error.attach(err);
   });
-  afterEach(function(done) {
+  afterEach((done) => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     err = null;
-    var remove = function() {
+    var remove = function () {
       if (!created.length) { return done(); }
       const createdKey = created.shift();
-      return client.del(createdKey, function(err) {
+      return client.del(createdKey, (err) => {
         if (err) { return done(err); }
         return remove();
       });
@@ -63,11 +64,11 @@ describe('Set component', function() {
     return remove();
   });
 
-  describe('setting a key', () => it('should persist the key', function(done) {
+  describe('setting a key', () => it('should persist the key', (done) => {
     err.on('data', done);
-    out.on('data', function(data) {
+    out.on('data', (data) => {
       chai.expect(data).to.equal('OK');
-      return client.get('testset', function(err, reply) {
+      return client.get('testset', (err, reply) => {
         if (err) { return done(err); }
         chai.expect(reply).to.equal('foo');
         created.push('testset');
@@ -79,20 +80,20 @@ describe('Set component', function() {
     return val.disconnect();
   }));
 
-  describe('setting multiple keys', () => it('should persist the keys', function(done) {
+  describe('setting multiple keys', () => it('should persist the keys', (done) => {
     const expected = {
       testfirst: 'foo',
-      testsecond: 'bar'
+      testsecond: 'bar',
     };
     const expectedKeys = Object.keys(expected);
     const receivedKeys = [];
 
     err.on('data', done);
-    out.on('data', function(data) {
+    out.on('data', (data) => {
       chai.expect(data).to.equal('OK');
       const expectedKey = expectedKeys.shift();
       const expectedVal = expected[expectedKey];
-      return client.get(expectedKey, function(err, reply) {
+      return client.get(expectedKey, (err, reply) => {
         if (err) { return done(err); }
         chai.expect(reply).to.equal(expectedVal);
         created.push(expectedKey);
@@ -101,7 +102,7 @@ describe('Set component', function() {
       });
     });
 
-    for (let keyName in expected) {
+    for (const keyName in expected) {
       const valContent = expected[keyName];
       key.send(keyName);
       val.send(valContent);
@@ -109,11 +110,11 @@ describe('Set component', function() {
     return val.disconnect();
   }));
 
-  return describe('setting a key with object value', () => it('should persist the key', function(done) {
+  return describe('setting a key with object value', () => it('should persist the key', (done) => {
     err.on('data', done);
-    out.on('data', function(data) {
+    out.on('data', (data) => {
       chai.expect(data).to.equal('OK');
-      return client.get('testset', function(err, reply) {
+      return client.get('testset', (err, reply) => {
         if (err) { return done(err); }
         const obj = JSON.parse(reply);
         chai.expect(obj.id).to.equal('bergie');
@@ -125,7 +126,7 @@ describe('Set component', function() {
     key.send('testset');
     val.send({
       id: 'bergie',
-      displayName: 'Henri Bergius'
+      displayName: 'Henri Bergius',
     });
     return val.disconnect();
   }));
