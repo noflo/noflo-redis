@@ -20,9 +20,6 @@
   },
   "devDependencies": {
     "chai": "^4.0.0",
-    "coffeelint": "^2.0.7",
-    "coffeescript": "^2.0.2",
-    "coveralls": "^3.0.0",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0"
   },
@@ -30,12 +27,11 @@
     "icon": "database"
   },
   "scripts": {
-    "pretest": "coffeelint -r components spec",
-    "test": "nyc mocha --require coffeescript/register spec/*.coffee"
+    "test": "nyc mocha spec/*.js"
   },
   "nyc": {
     "include": [
-      "components/*.coffee"
+      "components/*.js"
     ]
   }
 }
