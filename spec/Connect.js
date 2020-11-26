@@ -1,39 +1,11 @@
-const noflo = require('noflo');
 const chai = require('chai');
-const baseDir = path.resolve(__dirname, '../');
+const Wrapper = require('noflo-wrapper');
 
 describe('Connect component', () => {
-  let c = null;
-  let ins = null;
-  let out = null;
-  let err = null;
   let client = null;
-  before(function (done) {
-    this.timeout(4000);
-    const loader = new noflo.ComponentLoader(baseDir);
-    loader.load('redis/Connect', (error, instance) => {
-      if (error) {
-        done(error);
-        return;
-      }
-      c = instance;
-      ins = noflo.internalSocket.createSocket();
-      c.inPorts.url.attach(ins);
-      done();
-    });
-  });
-  after((done) => c.shutdown(done));
-  beforeEach(() => {
-    out = noflo.internalSocket.createSocket();
-    c.outPorts.client.attach(out);
-    err = noflo.internalSocket.createSocket();
-    c.outPorts.error.attach(err);
-  });
+  let c = Wrapper('redis/connect');
+  before(t.start);
   afterEach((done) => {
-    c.outPorts.client.detach(out);
-    out = null;
-    c.outPorts.error.detach(err);
-    err = null;
     if (!client) {
       done();
       return;
@@ -47,30 +19,36 @@ describe('Connect component', () => {
       done();
     });
   });
-  describe('with an empty URL', () => it('should connect to default Redis', (done) => {
-    err.on('data', done);
-    out.on('data', (redis) => {
-      client = redis;
-      chai.expect(client.psubscribe).to.be.a('function');
-      done();
+  describe('with an empty URL', () => {
+    it('should connect to default Redis', () => {
+      c.send('in', null);
+      return c
+        .receive('out')
+        .then((redis) => {
+          client = redis;
+          chai.expect(client.psubscribe).to.be.a('function');
+        });
     });
-    ins.send(null);
-  }));
-  describe('with a correctly-defined URL', () => it('should connect to defined Redis', (done) => {
-    err.on('data', done);
-    out.on('data', (redis) => {
-      client = redis;
-      chai.expect(client.psubscribe).to.be.a('function');
-      done();
+  });
+  describe('with a correctly-defined URL', () => {
+    it('should connect to defined Redis', () => {
+      c.send('in', 'redis://localhost:6379');
+      return c
+        .receive('out')
+        .then((redis) => {
+          client = redis;
+          chai.expect(client.psubscribe).to.be.a('function');
+        });
     });
-    ins.send('redis://localhost:6379');
-  }));
-  describe('with an incorrect URL', () => it('should send an error', (done) => {
-    err.on('data', (error) => {
-      chai.expect(error).to.be.an('error');
-      done();
+  });
+  describe('with an incorrect URL', () => {
+    it('should send an error', () => {
+      c.send('in', 'redis://localhost:6380');
+      return c
+        .receive('out')
+        .then((error) => {
+          chai.expect(error).to.be.an('error');
+        });
     });
-    out.on('data', () => done(new Error('Received connection while should not have')));
-    ins.send('redis://localhost:6380');
-  }));
+  });
 });
