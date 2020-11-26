@@ -4,7 +4,7 @@ const Wrapper = require('noflo-wrapper');
 describe('Connect component', () => {
   let client = null;
   const c = new Wrapper('redis/connect');
-  before(c.start);
+  before((done) => c.start(done));
   afterEach((done) => {
     if (!client) {
       done();
