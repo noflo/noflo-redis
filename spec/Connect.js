@@ -21,9 +21,9 @@ describe('Connect component', () => {
   });
   describe('with an empty URL', () => {
     it('should connect to default Redis', () => {
-      c.send('in', null);
+      c.send('url', null);
       return c
-        .receive('out')
+        .receive('client')
         .then((redis) => {
           client = redis;
           chai.expect(client.psubscribe).to.be.a('function');
@@ -32,9 +32,9 @@ describe('Connect component', () => {
   });
   describe('with a correctly-defined URL', () => {
     it('should connect to defined Redis', () => {
-      c.send('in', 'redis://localhost:6379');
+      c.send('url', 'redis://localhost:6379');
       return c
-        .receive('out')
+        .receive('client')
         .then((redis) => {
           client = redis;
           chai.expect(client.psubscribe).to.be.a('function');
@@ -43,9 +43,9 @@ describe('Connect component', () => {
   });
   describe('with an incorrect URL', () => {
     it('should send an error', () => {
-      c.send('in', 'redis://localhost:6380');
+      c.send('url', 'redis://localhost:6380');
       return c
-        .receive('out')
+        .receive('error')
         .then((error) => {
           chai.expect(error).to.be.an('error');
         });
