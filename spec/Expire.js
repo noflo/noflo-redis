@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let baseDir; let
   chai;
 const noflo = require('noflo');
@@ -23,35 +18,34 @@ describe('Expire component', () => {
   let out = null;
   let err = null;
   let client = null;
-  before(function (done) {
+  before(function () {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Expire', (err, keytance) => {
-      if (err) { return done(err); }
-      c = keytance;
-      key = noflo.internalSocket.createSocket();
-      c.inPorts.key.attach(key);
-      expire = noflo.internalSocket.createSocket();
-      c.inPorts.expire.attach(expire);
-      client = redis.createClient();
-      const clientSocket = noflo.internalSocket.createSocket();
-      c.inPorts.client.attach(clientSocket);
-      clientSocket.send(client);
-      return done();
-    });
+    return loader.load('redis/Expire')
+      .then((instance) => {
+        c = instance;
+        key = noflo.internalSocket.createSocket();
+        c.inPorts.key.attach(key);
+        expire = noflo.internalSocket.createSocket();
+        c.inPorts.expire.attach(expire);
+        client = redis.createClient();
+        const clientSocket = noflo.internalSocket.createSocket();
+        c.inPorts.client.attach(clientSocket);
+        clientSocket.send(client);
+      });
   });
   after((done) => client.quit(done));
   beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
-    return c.outPorts.error.attach(err);
+    c.outPorts.error.attach(err);
   });
   afterEach(() => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
-    return err = null;
+    err = null;
   });
 
   describe('with a missing key', () => it('should send an error', (done) => {
@@ -59,31 +53,31 @@ describe('Expire component', () => {
       chai.expect(data).to.be.an('error');
       chai.expect(data.message).to.equal('No value');
       chai.expect(data.key).to.equal('testmissingkey');
-      return done();
+      done();
     });
 
     key.send('testmissingkey');
-    return expire.send(60);
+    expire.send(60);
   }));
 
-  return describe('with an existing key', () => {
+  describe('with an existing key', () => {
     it('should send the key', (done) => {
       err.on('data', done);
       out.on('data', (data) => {
         chai.expect(data).to.equal('newkey');
-        return done();
+        done();
       });
 
-      return client.set('newkey', 'baz', (err, reply) => {
+      client.set('newkey', 'baz', (err, reply) => {
         if (err) { return done(err); }
         key.send('newkey');
-        return expire.send(1);
+        expire.send(1);
       });
     });
-    return it('should have expired the key', (done) => setTimeout(() => client.get('newkey', (err, reply) => {
+    it('should have expired the key', (done) => setTimeout(() => client.get('newkey', (err, reply) => {
       if (err) { return done(err); }
       chai.expect(reply).to.be.a('null');
-      return done();
+      done();
     }),
     1100));
   });
