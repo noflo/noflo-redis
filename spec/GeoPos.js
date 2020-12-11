@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let baseDir; let
   chai;
 const noflo = require('noflo');
@@ -23,24 +18,22 @@ describe('GeoPos component', () => {
   let lat = null;
   let lon = null;
   let err = null;
-  const created = [];
   let client = null;
-  before(function (done) {
+  before(function () {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/GeoPos', (err, instance) => {
-      if (err) { return done(err); }
-      c = instance;
-      key = noflo.internalSocket.createSocket();
-      c.inPorts.key.attach(key);
-      member = noflo.internalSocket.createSocket();
-      c.inPorts.member.attach(member);
-      client = redis.createClient();
-      const clientSocket = noflo.internalSocket.createSocket();
-      c.inPorts.client.attach(clientSocket);
-      clientSocket.send(client);
-      return done();
-    });
+    return loader.load('redis/GeoPos')
+      .then((instance) => {
+        c = instance;
+        key = noflo.internalSocket.createSocket();
+        c.inPorts.key.attach(key);
+        member = noflo.internalSocket.createSocket();
+        c.inPorts.member.attach(member);
+        client = redis.createClient();
+        const clientSocket = noflo.internalSocket.createSocket();
+        c.inPorts.client.attach(clientSocket);
+        clientSocket.send(client);
+      });
   });
   after((done) => client.quit(done));
   beforeEach(() => {
@@ -49,7 +42,7 @@ describe('GeoPos component', () => {
     lon = noflo.internalSocket.createSocket();
     c.outPorts.longitude.attach(lon);
     err = noflo.internalSocket.createSocket();
-    return c.outPorts.error.attach(err);
+    c.outPorts.error.attach(err);
   });
   afterEach(() => {
     c.outPorts.latitude.detach(lat);
@@ -57,7 +50,7 @@ describe('GeoPos component', () => {
     c.outPorts.longitude.detach(lon);
     lon = null;
     c.outPorts.error.detach(err);
-    return err = null;
+    err = null;
   });
   describe('with a missing key', () => it('should send an error', (done) => {
     const groups = [];
@@ -70,7 +63,7 @@ describe('GeoPos component', () => {
       chai.expect(data.key).to.equal('testmissingkey');
       chai.expect(data.member).to.equal('EFHF');
       chai.expect(groups).to.eql(['foo', 'bar']);
-      return done();
+      done();
     });
 
     key.send('testmissingkey');
@@ -78,12 +71,12 @@ describe('GeoPos component', () => {
     member.beginGroup('bar');
     member.send('EFHF');
     member.endGroup();
-    return member.endGroup();
+    member.endGroup();
   }));
-  return describe('with an existing key and member', () => {
+  describe('with an existing key and member', () => {
     before((done) => client.geoadd('testset', 60.254558, 25.042828, 'EFHF', done));
     after((done) => client.zrem('testset', 'EFHF', done));
-    return it('should send the coordinates', (done) => {
+    it('should send the coordinates', (done) => {
       const expected = ['latitude', 'longitude'];
       const received = [];
       lat.on('data', (data) => {
@@ -91,17 +84,17 @@ describe('GeoPos component', () => {
         received.push('latitude');
         if (received.length !== expected.length) { return; }
         chai.expect(received).to.eql(expected);
-        return done();
+        done();
       });
       lon.on('data', (data) => {
         chai.expect(data).to.be.a('number');
         received.push('longitude');
         if (received.length !== expected.length) { return; }
         chai.expect(received).to.eql(expected);
-        return done();
+        done();
       });
       key.send('testset');
-      return member.send('EFHF');
+      member.send('EFHF');
     });
   });
 });

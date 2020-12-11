@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let baseDir; let
   chai;
 const noflo = require('noflo');
@@ -24,60 +19,59 @@ describe('Set component', () => {
   let err = null;
   const created = [];
   let client = null;
-  before(function (done) {
+  before(function () {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
-    return loader.load('redis/Set', (err, instance) => {
-      if (err) { return done(err); }
-      c = instance;
-      key = noflo.internalSocket.createSocket();
-      c.inPorts.key.attach(key);
-      val = noflo.internalSocket.createSocket();
-      c.inPorts.value.attach(val);
-      client = redis.createClient();
-      const clientSocket = noflo.internalSocket.createSocket();
-      c.inPorts.client.attach(clientSocket);
-      clientSocket.send(client);
-      return done();
-    });
+    return loader.load('redis/Set')
+      .then((instance) => {
+        c = instance;
+        key = noflo.internalSocket.createSocket();
+        c.inPorts.key.attach(key);
+        val = noflo.internalSocket.createSocket();
+        c.inPorts.value.attach(val);
+        client = redis.createClient();
+        const clientSocket = noflo.internalSocket.createSocket();
+        c.inPorts.client.attach(clientSocket);
+        clientSocket.send(client);
+      });
   });
   after((done) => client.quit(done));
   beforeEach(() => {
     out = noflo.internalSocket.createSocket();
     c.outPorts.out.attach(out);
     err = noflo.internalSocket.createSocket();
-    return c.outPorts.error.attach(err);
+    c.outPorts.error.attach(err);
   });
   afterEach((done) => {
     c.outPorts.out.detach(out);
     out = null;
     c.outPorts.error.detach(err);
     err = null;
-    var remove = function () {
+    function remove() {
       if (!created.length) { return done(); }
       const createdKey = created.shift();
-      return client.del(createdKey, (err) => {
+      client.del(createdKey, (err) => {
         if (err) { return done(err); }
-        return remove();
+        remove();
       });
     };
-    return remove();
+    remove();
   });
 
   describe('setting a key', () => it('should persist the key', (done) => {
     err.on('data', done);
     out.on('data', (data) => {
       chai.expect(data).to.equal('OK');
-      return client.get('testset', (err, reply) => {
+      client.get('testset', (err, reply) => {
         if (err) { return done(err); }
         chai.expect(reply).to.equal('foo');
         created.push('testset');
-        return done();
+        done();
       });
     });
     key.send('testset');
     val.send('foo');
-    return val.disconnect();
+    val.disconnect();
   }));
 
   describe('setting multiple keys', () => it('should persist the keys', (done) => {
@@ -93,7 +87,7 @@ describe('Set component', () => {
       chai.expect(data).to.equal('OK');
       const expectedKey = expectedKeys.shift();
       const expectedVal = expected[expectedKey];
-      return client.get(expectedKey, (err, reply) => {
+      client.get(expectedKey, (err, reply) => {
         if (err) { return done(err); }
         chai.expect(reply).to.equal(expectedVal);
         created.push(expectedKey);
@@ -107,20 +101,20 @@ describe('Set component', () => {
       key.send(keyName);
       val.send(valContent);
     }
-    return val.disconnect();
+    val.disconnect();
   }));
 
-  return describe('setting a key with object value', () => it('should persist the key', (done) => {
+  describe('setting a key with object value', () => it('should persist the key', (done) => {
     err.on('data', done);
     out.on('data', (data) => {
       chai.expect(data).to.equal('OK');
-      return client.get('testset', (err, reply) => {
+      client.get('testset', (err, reply) => {
         if (err) { return done(err); }
         const obj = JSON.parse(reply);
         chai.expect(obj.id).to.equal('bergie');
         chai.expect(obj.displayName).to.equal('Henri Bergius');
         created.push('testset');
-        return done();
+        done();
       });
     });
     key.send('testset');
@@ -128,6 +122,6 @@ describe('Set component', () => {
       id: 'bergie',
       displayName: 'Henri Bergius',
     });
-    return val.disconnect();
+    val.disconnect();
   }));
 });
