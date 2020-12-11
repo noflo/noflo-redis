@@ -35,13 +35,13 @@ describe('Subscribe component', () => {
       });
   });
   after((done) => {
-    c.shutdown((err) => {
-      if (err) { return done(err); }
-      client.quit((err) => {
-        if (err) { return done(err); }
-        client2.quit(done);
-      });
-    });
+    c.shutdown()
+      .then(() => {
+        client.quit((err) => {
+          if (err) { return done(err); }
+          client2.quit(done);
+        });
+      }, done);
   });
   beforeEach(() => {
     out = noflo.internalSocket.createSocket();

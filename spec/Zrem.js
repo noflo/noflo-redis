@@ -18,7 +18,7 @@ describe('Zrem component', () => {
   let out = null;
   let err = null;
   let client = null;
-  before(function (done) {
+  before(function () {
     this.timeout(4000);
     const loader = new noflo.ComponentLoader(baseDir);
     return loader.load('redis/Zrem')
